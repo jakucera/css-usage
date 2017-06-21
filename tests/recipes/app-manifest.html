@@ -3,11 +3,20 @@
 <head>
     <meta charset="utf-8" />
     <title>App Manifest test</title>
-    <link rel="manifest" href="https://pwa.rocks/pwa.webmanifest">
+    <link rel="manifest" href="manifest.json">
     <script src="../../Recipe.min.js"></script>
     <style></style>
 </head>
 <body>
     <p>App Manifest recipe test</p>
+
+    <pre id="results"></pre>
+    <script>
+        setTimeout(function () {
+            var recipeResultsString = JSON.stringify(RecipeResults["appManifest"]);
+            recipeResultsString = recipeResultsString.replace(/([{},])/g, "\n");
+            document.querySelector("#results").textContent = recipeResultsString;
+        }, 3000)
+    </script>
 </body>
 </html>
