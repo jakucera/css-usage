@@ -1548,9 +1548,8 @@ void function() { try {
 */
 
 void function() {
-    var _results = {};
-
     function testProperty(manifest, name, value) {
+        _results = this;
         if (manifest.hasOwnProperty(name) && manifest[name].length > 0) {
             return value;
         }
@@ -1559,6 +1558,7 @@ void function() {
     }
 
     function testCommonName(manifest, propertyName, value) {
+        _results = this;
         var name = "";
         if ("name" in manifest) {
             name = manifest["name"].toLowerCase();
@@ -1595,6 +1595,7 @@ void function() {
     }
 
     function testServiceWorker(manifest, name, value) {
+        _results = this;
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.ready.then(function (res) {
                 if (res['active'].__proto__ === ServiceWorker.prototype) {
@@ -1607,6 +1608,7 @@ void function() {
     }
 
     function testHttpsSupport(manifest, name, value) {
+        _results = this;
         var returnValue = 0x0;
 
         if (!("start_url" in manifest)) {
@@ -1626,8 +1628,8 @@ void function() {
         return returnValue;
     }
 
-    function iconDownloadComplete(response, value) {
-        if (response.target.status == 200 && response.target.response) {
+    function iconDownloadComplete(xhr, value, _results) {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             _results["valid_icon"] = value;
         } else {
             _results["valid_icon"] = 0;
@@ -1635,13 +1637,15 @@ void function() {
     }
 
     function testValidIcon(manifest, name, value) {
+        _results = this;
         var req = new XMLHttpRequest();
 
         var hasIconsProperty = "icons" in manifest && manifest["icons"].length > 0;
         var hasValidSrc = "src" in manifest["icons"][0] && manifest["icons"][0]["src"].length > 0;
 
         if (hasIconsProperty && hasValidSrc) {
-            req.addEventListener("load", function (response) { iconDownloadComplete(response, value); });
+            //req.addEventListener("load", function (response) { iconDownloadComplete(response, value, _results); });
+            req.onreadystatechange = (evt) => { iconDownloadComplete(evt.target, value, _results); };
             req.addEventListener("error", function () { _results["valid_icon"] = 0; });
             req.addEventListener("abort", function () { _results["valid_icon"] = 0; });
             req.open("GET", manifest["icons"][0].src);
@@ -1653,8 +1657,8 @@ void function() {
         return 0x0;
     }
 
-    function startUrlDownloadComplete(response, value) {
-        if (response.target.status == 200 && response.target.response) {
+    function startUrlDownloadComplete(xhr, value, _results) {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             _results["valid_start_url"] = value;
         } else {
             _results["valid_start_url"] = 0;
@@ -1662,10 +1666,12 @@ void function() {
     }
 
     function testStartUrl(manifest, name, value) {
+        _results = this;
         var req = new XMLHttpRequest();
 
         if ("start_url" in manifest && manifest["start_url"].length > 0) {
-            req.addEventListener("load", function (response) { startUrlDownloadComplete(response, value); });
+            //req.addEventListener("load", function (response) { startUrlDownloadComplete(response, value, _results); });
+            req.onreadystatechange = (evt) => { startUrlDownloadComplete(evt.target, value, _results); };
             req.addEventListener("error", function () { _results["valid_start_url"] = 0; });
             req.addEventListener("abort", function () { _results["valid_start_url"] = 0; });
             req.open("GET", manifest["start_url"]);
@@ -1677,27 +1683,29 @@ void function() {
         return 0x0;
     }
 
-    function scoreManifest(manifest) {
+    function scoreManifest(manifest, _results) {
         var score = 0x0000;
 
+        console.log(_results);
+
         var properties = [
-            { name: "common_name",          value: 0x00001, test_fn: testCommonName },
-            { name: "name",                 value: 0x00002, test_fn: testProperty },
-            { name: "icons",                value: 0x00004, test_fn: testProperty },
-            { name: "gcm_sender_id",        value: 0x00008, test_fn: testProperty },
-            { name: "orientation",          value: 0x00010, test_fn: testProperty },
-            { name: "display",              value: 0x00020, test_fn: testProperty },
-            { name: "theme_color",          value: 0x00040, test_fn: testProperty },
-            { name: "background_color",     value: 0x00080, test_fn: testProperty },
-            { name: "related_applications", value: 0x00100, test_fn: testProperty },
-            { name: "description",          value: 0x00200, test_fn: testProperty },
-            { name: "short_name",           value: 0x00400, test_fn: testProperty },
-            { name: "start_url",            value: 0x00800, test_fn: testProperty },
-            { name: "scope",                value: 0x01000, test_fn: testProperty },
-            { name: "service_worker",       value: 0x02000, test_fn: testServiceWorker },
-            { name: "has_https",            value: 0x04000, test_fn: testHttpsSupport },
-            { name: "valid_icon",           value: 0x08000, test_fn: testValidIcon },
-            { name: "valid_start_url",      value: 0x10000, test_fn: testStartUrl }
+            { name: "common_name",          value: 0x00001, test_fn: testCommonName.bind(_results) },
+            { name: "name",                 value: 0x00002, test_fn: testProperty.bind(_results) },
+            { name: "icons",                value: 0x00004, test_fn: testProperty.bind(_results) },
+            { name: "gcm_sender_id",        value: 0x00008, test_fn: testProperty.bind(_results) },
+            { name: "orientation",          value: 0x00010, test_fn: testProperty.bind(_results) },
+            { name: "display",              value: 0x00020, test_fn: testProperty.bind(_results) },
+            { name: "theme_color",          value: 0x00040, test_fn: testProperty.bind(_results) },
+            { name: "background_color",     value: 0x00080, test_fn: testProperty.bind(_results) },
+            { name: "related_applications", value: 0x00100, test_fn: testProperty.bind(_results) },
+            { name: "description",          value: 0x00200, test_fn: testProperty.bind(_results) },
+            { name: "short_name",           value: 0x00400, test_fn: testProperty.bind(_results) },
+            { name: "start_url",            value: 0x00800, test_fn: testProperty.bind(_results) },
+            { name: "scope",                value: 0x01000, test_fn: testProperty.bind(_results) },
+            { name: "service_worker",       value: 0x02000, test_fn: testServiceWorker.bind(_results) },
+            { name: "has_https",            value: 0x04000, test_fn: testHttpsSupport.bind(_results) },
+            { name: "valid_icon",           value: 0x08000, test_fn: testValidIcon.bind(_results) },
+            { name: "valid_start_url",      value: 0x10000, test_fn: testStartUrl.bind(_results) }
         ];
 
         for (var i = 0; i < properties.length; i++) {
@@ -1707,16 +1715,21 @@ void function() {
         return score;
     }
 
-    function downloadComplete(request)
+    function setErrorResult(_results) {
+        _results["error"] = 1;
+    }
+
+    function downloadComplete(xhr, _results)
     {
+        console.log(_results);
         try {
-            var manifest = JSON.parse(this.responseText);
-            var manifestScore = scoreManifest(manifest);
+            var manifest = JSON.parse(xhr.responseText);
+            var manifestScore = scoreManifest(manifest, _results);
             _results["score"] = manifestScore;
             _results["error"] = 0;
         } catch (ex) {
-            console.log(ex);
-            _results["error"] = 1;
+            console.log("Caught exception: " + ex);
+            setErrorResult(_results);
         }
     }
 
@@ -1725,23 +1738,31 @@ void function() {
         return href.match(/http[s]?:\/\/.+/gi);
     }
 
+    function handleReadyStateChange(xhr, _results) {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            downloadComplete(xhr, _results);
+        }
+    }
+
     function appManifest(element, results) {
+        var _results = {};
+
         if(element.nodeName == 'LINK') {
             var relValue = element.getAttribute('rel');
             if (relValue == 'manifest')
             {
-                var value = element.href;
-                results[value] = results[value] || { count: 0 };
-                results[value].count++;
+                var href = element.href;
+                results[href] = results[href] || { count: 0 };
+                results[href].count++;
 
-                _results = results[value];
+                _results = results[href];
 
                 if (validHrefValue(element.href)) {
                     var req = new XMLHttpRequest();
-                    req.addEventListener("load", downloadComplete);
-                    req.addEventListener("error", function () { _results["error"] = 1; });
-                    req.addEventListener("abort", function () { _results["error"] = 1; });
-                    req.open("GET", element.href);
+                    req.onreadystatechange = (evt) => { handleReadyStateChange(evt.target, _results); };
+                    req.addEventListener("error", setErrorResult.bind(_results));
+                    req.addEventListener("abort", setErrorResult.bind(_results));
+                    req.open("GET", href);
                     req.send();
                 }
             }
