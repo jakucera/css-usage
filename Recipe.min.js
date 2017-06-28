@@ -1545,6 +1545,7 @@ void function() { try {
     Author: Joel Kucera
     Description: This recipe looks for app manifest declarations.
         ex, <link rel='manifest' href='/manifest.json'>
+        If found it will download the manifest and check for known properties.
 */
 
 void function() {
@@ -1553,8 +1554,8 @@ void function() {
     function appManifest(element, results) {
         var analyzer = new AppManifestAnalyzer();
 
-        if(element.nodeName.toLowerCase() === 'link' 
-           && element.rel !== undefined 
+        if(element.nodeName.toLowerCase() === 'link'
+           && element.rel !== undefined
            && element.rel.toLowerCase() === 'manifest') {
             analyzer.analyzeManifest(element.href, results);
         }
@@ -1579,11 +1580,14 @@ void function() {
             display: "display",
             theme_color: "theme_color",
             background_color: "background_color",
-            related_aplications: "related_applications",
+            related_applications: "related_applications",
             description: "description",
             short_name: "short_name",
             start_url: "start_url",
             scope: "scope",
+            dir: "dir", // not tested
+            prefer_related_applications: "prefer_related_applications", // not tested
+            lang: "lang" // not tested
         }
 
         // Analyze Manifest

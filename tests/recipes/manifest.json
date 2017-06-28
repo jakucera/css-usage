@@ -1,6 +1,17 @@
 {
 	"short_name": "Manifest Test",
 	"name": "My App",
+	"short_Name": "app",
+	"gcm_sender_id": "abc",
+	"orientation": "portrait",
+	"related_applications": [
+		{
+			"platform": "play",
+			"id": "something"
+		}
+	],
+	"description": "test manifest",
+	"scope": "/",
 	"display": "standalone",
 	"icons": [
 		{

@@ -3,9 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <title>App Manifest test</title>
-    <link rel="manifest" href="manifest.json">
+    <LINK rel=manifest href="manifest4.json"> <!-- html instead of json -->
+    <link REL="manifest" href="manifest.json">
     <link rel="Manifest" href="manifest2.json">
+    <link href="manifest3.json" rel="Manifest"> <!-- doesn't exist -->
     <link rel="manifest">
+    <link />
     <link rel="stylesheet" href="styles.css">
     <script src="../../Recipe.min.js"></script>
     <style></style>
@@ -20,6 +23,12 @@
             recipeResultsString = recipeResultsString.replace(/([{},])/g, "\n");
             document.querySelector("#results").textContent = recipeResultsString;
         }, 3000)
+
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker
+                .register("./sw.js")
+                .then(function() { console.log("serviceworker registered"); });
+        }
     </script>
 </body>
 </html>
