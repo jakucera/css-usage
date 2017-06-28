@@ -1775,60 +1775,32 @@ void function() {
 }();
 
 /* 
-    RECIPE: Max-width on Replaced Elements
+    RECIPE: z-index on static flex items
     -------------------------------------------------------------
-    Author: Greg Whitworth
-    Description: This is investigation for the CSSWG looking into
-    max-width with a % on a replaced element. If the results return
-    too large we may want to take the next step to roughly determine
-    if one of the parent's are depending on the sizing of its child.
-    For example, abspos, table cell, floats, etc. That will be more
-    computationally extensive so we'll start a simpler investigation first.
-
-    Action Link: https://log.csswg.org/irc.w3.org/css/2017-03-01/#e778075
+    Author: Francois Remy
+    Description: Get count of flex items who should create a stacking context but do not really
 */
 
 void function() {
-    window.CSSUsage.StyleWalker.recipesToRun.push( function MaxWidthPercentOnReplacedElem(element, results) {
-        // Bail if the element doesn't have the props we're looking for
-        if(!element.CSSUsage || !(element.CSSUsage["max-width"])) return;
 
-        var replacedElems = ["INPUT", "TEXTAREA"];
-        var maxWidth = element.CSSUsage['max-width'];
-        var width = element.CSSUsage['width'];
+    window.CSSUsage.StyleWalker.recipesToRun.push( function zstaticflex(/*HTML DOM Element*/ element, results) {
+        if(!element.parentElement) return;
 
-        if(!maxWidth.includes('%')) return;
-
-         // We only want auto sized boxes
-        if(width && !width.includes('auto')) return;
-
-        if(replacedElems.includes(element.nodeName)) {
-
-            if(element.nodeName == "INPUT" && element.type != "text") {
-                return;
-            }
-
-            // TSV eg: 5 recipe MaxWidthPercentOnReplacedElem INPUT count
-            results[element.nodeName] = results[element.nodeName] || { count: 0 };
-            results[element.nodeName].count++;
+        // the problem happens if the element is a flex item with static position and non-auto z-index
+        if(getComputedStyle(element.parentElement).display != 'flex') return results;
+        if(getComputedStyle(element).position != 'static') return results;
+        if(getComputedStyle(element).zIndex != 'auto') {
+            results.likely = 1;
         }
 
-        return results;
-    });
-}();
-/* 
-    RECIPE: <NAME OF RECIPE>
-    -------------------------------------------------------------
-    Author: <YOUR NAME>
-    Description: <WHAT IS YOUR RECIPE LOOKING FOR>
+        // the problem might happen if z-index could ever be non-auto
+        if(element.CSSUsage["z-index"] && element.CSSUsage["z-index"].valuesArray.length > 0) {
+            results.possible = 1;
+        }
 
-void function() {
-    window.CSSUsage.StyleWalker.recipesToRun.push( function <NameYourRecipe>( element, results) {
-        return results;
     });
 }();
 
-*/
 //
 // This file is only here to create the TSV
 // necessary to collect the data from the crawler
@@ -2053,7 +2025,7 @@ void function() {
 
         // Check to see if you're on a Firefox failure page
         if(document.styleSheets.length == 1 && browserIsFirefox) {
-            if(document.styleSheets[0].href.indexOf('aboutNetError') != -1) {
+            if(document.styleSheets[0].href !== null && document.styleSheets[0].href.indexOf('aboutNetError') != -1) {
                 return;
             }
         }
