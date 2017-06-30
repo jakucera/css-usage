@@ -6,17 +6,17 @@ module.exports = function(grunt) {
     concat: {
         src: {
             src: [
-			        'src/lodash.js',
-			        'src/cssShorthands.js',                                     
-              'src/fwks/*',              
-              'src/fwkUsage.js',               
+              'src/lodash.js',
+              'src/cssShorthands.js',
+              'src/fwks/*',
+              'src/fwkUsage.js',
               'src/patterns.js',
               'src/patternUsage.js',
-              'src/htmlUsage.js',              
+              'src/htmlUsage.js',
               'src/cssUsage.js',
-              'src/recipes/*',    
+              'src/recipes/*',
               'src/crawl/prepareTsv.js',
-              'src/init.js'              
+              'src/init.js'
             ],
             dest: 'cssUsage.src.js'
         }
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
       }
     }
   });
-  
+
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-strip-code');
   grunt.registerTask('default', ['concat', 'strip_code']);

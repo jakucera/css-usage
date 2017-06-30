@@ -225,9 +225,7 @@ void function() { try {
 
 			// Some CssRules have nested rules to walk through:
 			if (rule.cssRules && rule.cssRules.length>0) {
-				
 				walkOverCssRules(rule.cssRules, rule.parentStyleSheet, parentMatchedElements);
-				
 			}
 
 			// Some CssRules have style we can ananlyze
@@ -1036,9 +1034,6 @@ void function() { try {
 			CSSUsageResults.usages = results;
 			if(window.debugCSSUsage) if(window.debugCSSUsage) console.log(CSSUsageResults.usages);
 		}
-
-		
-			
 	}();
 	
 } catch (ex) { /* do something maybe */ throw ex; } }();

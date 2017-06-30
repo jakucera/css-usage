@@ -722,9 +722,7 @@ void function() { try {
 
 			// Some CssRules have nested rules to walk through:
 			if (rule.cssRules && rule.cssRules.length>0) {
-				
 				walkOverCssRules(rule.cssRules, rule.parentStyleSheet, parentMatchedElements);
-				
 			}
 
 			// Some CssRules have style we can ananlyze
@@ -1533,9 +1531,6 @@ void function() { try {
 			CSSUsageResults.usages = results;
 			if(window.debugCSSUsage) if(window.debugCSSUsage) console.log(CSSUsageResults.usages);
 		}
-
-		
-			
 	}();
 	
 } catch (ex) { /* do something maybe */ throw ex; } }();
@@ -1761,6 +1756,8 @@ void function() {
 
             if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
                 _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
+                // Save the value of the start url so we can crawl it directly later
+                _results[manifest[_manifestStrings.start_url]] = 1;
             } else {
                 _results[name] = 0;
             }
@@ -1776,33 +1773,6 @@ void function() {
             }
         }
     }
-}();
-
-/* 
-    RECIPE: z-index on static flex items
-    -------------------------------------------------------------
-    Author: Francois Remy
-    Description: Get count of flex items who should create a stacking context but do not really
-*/
-
-void function() {
-
-    window.CSSUsage.StyleWalker.recipesToRun.push( function zstaticflex(/*HTML DOM Element*/ element, results) {
-        if(!element.parentElement) return;
-
-        // the problem happens if the element is a flex item with static position and non-auto z-index
-        if(getComputedStyle(element.parentElement).display != 'flex') return results;
-        if(getComputedStyle(element).position != 'static') return results;
-        if(getComputedStyle(element).zIndex != 'auto') {
-            results.likely = 1;
-        }
-
-        // the problem might happen if z-index could ever be non-auto
-        if(element.CSSUsage["z-index"] && element.CSSUsage["z-index"].valuesArray.length > 0) {
-            results.possible = 1;
-        }
-
-    });
 }();
 
 //
@@ -1997,35 +1967,32 @@ window.onCSSUsageResults = function onCSSUsageResults(CSSUsageResults) {
 void function() {
 
     var browserIsEdge = navigator.userAgent.indexOf('Edge')>=0;
-	var browserIsFirefox = navigator.userAgent.indexOf('Firefox')>=0;
+    var browserIsFirefox = navigator.userAgent.indexOf('Firefox')>=0;
 
     if(document.readyState !== 'complete') {
-        
         // if the document is loading, run when it loads or in 10s, whichever is less
         window.addEventListener('load', onready);
         setTimeout(onready, 10000);
-        
     } else {
-        
         // if the document is ready, run now
         onready();
-        
     }
 
-    /**
-     * This is the main entrypoint of our script
-     */
+    // This is the main entrypoint of our script
     function onready() {
-        
         // Uncomment if you want to set breakpoints when running in the console
         //debugger;
-        
+
         // Prevent this code from running multiple times
-        var firstTime = !onready.hasAlreadyRun; onready.hasAlreadyRun = true;
-        if(!firstTime) { return; /* for now... */ }
-        
+        var firstTime = !onready.hasAlreadyRun;
+        onready.hasAlreadyRun = true;
+
+        if(!firstTime) {
+            return; // for now...
+        }
+
         // Prevent this code from running when the page has no stylesheet (probably a redirect page)
-        if(document.styleSheets.length == 0) { return; }
+        // if(document.styleSheets.length == 0) { return; }
 
         // Check to see if you're on a Firefox failure page
         if(document.styleSheets.length == 1 && browserIsFirefox) {
@@ -2038,16 +2005,16 @@ void function() {
         var startTime = performance.now();
 
         // register tools
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);			
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
 
         // perform analysis
-        CSSUsage.StyleWalker.walkOverDomElements();
-        CSSUsage.StyleWalker.walkOverCssStyles();
-        CSSUsage.PropertyValuesAnalyzer.finalize();
-        CSSUsage.SelectorAnalyzer.finalize();
+        // CSSUsage.StyleWalker.walkOverDomElements();
+        // CSSUsage.StyleWalker.walkOverCssStyles();
+        // CSSUsage.PropertyValuesAnalyzer.finalize();
+        // CSSUsage.SelectorAnalyzer.finalize();
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
