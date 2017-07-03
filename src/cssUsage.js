@@ -282,7 +282,7 @@ void function() { try {
 					// Analyze the element
 					runElementAnalyzers(element, index);
 
-					if (element.hasAttribute('style')) {					
+					if (element.hasAttribute('style')) {
 						// Inline styles count like a style rule with no selector but one matched element
 						var ruleType = 1;
 						var isInline = true;

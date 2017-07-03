@@ -43,16 +43,16 @@ void function() {
         var startTime = performance.now();
 
         // register tools
-        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
-        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
-        // CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
-        // CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
+        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
+        CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
+        CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
 
         // perform analysis
-        // CSSUsage.StyleWalker.walkOverDomElements();
-        // CSSUsage.StyleWalker.walkOverCssStyles();
-        // CSSUsage.PropertyValuesAnalyzer.finalize();
-        // CSSUsage.SelectorAnalyzer.finalize();
+        CSSUsage.StyleWalker.walkOverDomElements();
+        CSSUsage.StyleWalker.walkOverCssStyles();
+        CSSUsage.PropertyValuesAnalyzer.finalize();
+        CSSUsage.SelectorAnalyzer.finalize();
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
