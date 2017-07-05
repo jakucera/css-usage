@@ -1627,6 +1627,12 @@ void function() {
                 console.log("Caught exception: " + ex);
                 _results[_errorResult] = 1;
             }
+
+            var event = new CustomEvent('results_done', {detail: {name: _scoreResult, value: _results[_scoreResult]}});
+            window.dispatchEvent(event);
+
+            event = new CustomEvent('results_done', {detail: {name: _errorResult, value: _results[_errorResult]}});
+            window.dispatchEvent(event);
         }
 
         function _scoreManifest(manifest) {
@@ -1655,7 +1661,7 @@ void function() {
             for (var i = 0; i < properties.length; i++) {
                 score = score | properties[i].test_fn(manifest, properties[i].name, properties[i].value);
             }
-
+            
             return score;
         }
 
@@ -1709,6 +1715,8 @@ void function() {
                     if (res["active"].__proto__ === ServiceWorker.prototype) {
                         _results[name] = value;
                     }
+                    var event = new CustomEvent('results_done', {detail: {name: name, value: value}});
+                    window.dispatchEvent(event);
                 });
             }
 
@@ -1761,6 +1769,9 @@ void function() {
             } else {
                 _results[name] = 0;
             }
+
+            var event = new CustomEvent('results_done', {detail: {name: name, value: value}});
+            window.dispatchEvent(event);
 
             return _results[name];
         }
@@ -1823,6 +1834,21 @@ void function() {
 	}	
 }();
 
+window.appendCSSUsageResults = function appendCSSUsageResults(results) {
+	var resultsElem = document.querySelector("head>script#css-usage-tsv-results");
+
+	if (!resultsElem) {
+		var resultsElem = document.createElement("script");
+		resultsElem.id = "css-usage-tsv-results";
+		resultsElem.type = "text/plain";
+		document.querySelector("head").appendChild(resultsElem);
+	}
+
+	var resultString = results.name + "\t" + results.value + "\n";
+
+	resultsElem.textContent += resultString;
+};
+
 window.onCSSUsageResults = function onCSSUsageResults(CSSUsageResults) {
 	// Collect the results (css)
 	INSTRUMENTATION_RESULTS.css = CSSUsageResults;
@@ -1840,7 +1866,7 @@ window.onCSSUsageResults = function onCSSUsageResults(CSSUsageResults) {
 		}
 	}
 	
-	// Convert into one signle tsv file
+	// Convert into one single tsv file
 	var tsvString = INSTRUMENTATION_RESULTS_TSV.map((row) => (row.join('\t'))).join('\n');
 	appendTSV(tsvString);
 	
@@ -2004,17 +2030,27 @@ void function() {
         // Keep track of duration
         var startTime = performance.now();
 
-        // register tools
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+        window.addEventListener('results_done', function (e) {
+            console.log(e.detail);
 
-        // perform analysis
-        CSSUsage.StyleWalker.walkOverDomElements();
-        CSSUsage.StyleWalker.walkOverCssStyles();
-        CSSUsage.PropertyValuesAnalyzer.finalize();
-        CSSUsage.SelectorAnalyzer.finalize();
+            // DO SOMETHING WITH THE CSS OBJECT HERE
+            window.debugCSSUsage = false;
+            if(window.appendCSSUsageResults) {
+                window.appendCSSUsageResults(e.detail);
+            }  
+        });
+
+        // // register tools
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+
+        // // perform analysis
+        // CSSUsage.StyleWalker.walkOverDomElements();
+        // CSSUsage.StyleWalker.walkOverCssStyles();
+        // CSSUsage.PropertyValuesAnalyzer.finalize();
+        // CSSUsage.SelectorAnalyzer.finalize();
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
@@ -2022,11 +2058,5 @@ void function() {
 
         // Update duration
         CSSUsageResults.duration = (performance.now() - startTime)|0;
-
-        // DO SOMETHING WITH THE CSS OBJECT HERE
-        window.debugCSSUsage = false;
-        if(window.onCSSUsageResults) {
-            window.onCSSUsageResults(CSSUsageResults);
-        }  
     }
 }();

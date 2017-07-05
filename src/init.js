@@ -42,17 +42,27 @@ void function() {
         // Keep track of duration
         var startTime = performance.now();
 
-        // register tools
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
-        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
-        CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+        window.addEventListener('results_done', function (e) {
+            console.log(e.detail);
 
-        // perform analysis
-        CSSUsage.StyleWalker.walkOverDomElements();
-        CSSUsage.StyleWalker.walkOverCssStyles();
-        CSSUsage.PropertyValuesAnalyzer.finalize();
-        CSSUsage.SelectorAnalyzer.finalize();
+            // DO SOMETHING WITH THE CSS OBJECT HERE
+            window.debugCSSUsage = false;
+            if(window.appendCSSUsageResults) {
+                window.appendCSSUsageResults(e.detail);
+            }  
+        });
+
+        // // register tools
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
+        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
+        // CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+
+        // // perform analysis
+        // CSSUsage.StyleWalker.walkOverDomElements();
+        // CSSUsage.StyleWalker.walkOverCssStyles();
+        // CSSUsage.PropertyValuesAnalyzer.finalize();
+        // CSSUsage.SelectorAnalyzer.finalize();
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
@@ -60,11 +70,5 @@ void function() {
 
         // Update duration
         CSSUsageResults.duration = (performance.now() - startTime)|0;
-
-        // DO SOMETHING WITH THE CSS OBJECT HERE
-        window.debugCSSUsage = false;
-        if(window.onCSSUsageResults) {
-            window.onCSSUsageResults(CSSUsageResults);
-        }  
     }
 }();

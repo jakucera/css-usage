@@ -46,6 +46,21 @@ void function() {
 	}	
 }();
 
+window.appendCSSUsageResults = function appendCSSUsageResults(results) {
+	var resultsElem = document.querySelector("head>script#css-usage-tsv-results");
+
+	if (!resultsElem) {
+		var resultsElem = document.createElement("script");
+		resultsElem.id = "css-usage-tsv-results";
+		resultsElem.type = "text/plain";
+		document.querySelector("head").appendChild(resultsElem);
+	}
+
+	var resultString = results.name + "\t" + results.value + "\n";
+
+	resultsElem.textContent += resultString;
+};
+
 window.onCSSUsageResults = function onCSSUsageResults(CSSUsageResults) {
 	// Collect the results (css)
 	INSTRUMENTATION_RESULTS.css = CSSUsageResults;
@@ -63,7 +78,7 @@ window.onCSSUsageResults = function onCSSUsageResults(CSSUsageResults) {
 		}
 	}
 	
-	// Convert into one signle tsv file
+	// Convert into one single tsv file
 	var tsvString = INSTRUMENTATION_RESULTS_TSV.map((row) => (row.join('\t'))).join('\n');
 	appendTSV(tsvString);
 	
