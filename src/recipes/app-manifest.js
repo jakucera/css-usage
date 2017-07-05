@@ -70,7 +70,7 @@ void function() {
             req.onreadystatechange = (evt) => { _handleXhrReadyStateChange(evt.target, cb, name, value); };
             req.addEventListener("error", (evt) => { cb(evt.target, name, 0x0); });
             req.addEventListener("abort", (evt) => { cb(evt.target, name, 0x0); });
-            req.open("GET", href);
+            req.open("GET", href, false);
             req.send();
         }
 
@@ -212,7 +212,7 @@ void function() {
                 _results[name] = 0;
             }
 
-            return 0x0;
+            return _results[name];
         }
 
         function _testStartUrl(manifest, name, value) {
@@ -226,7 +226,7 @@ void function() {
                 _results[name] = 0;
             }
 
-            return 0x0;
+            return _results[name];
         }
 
         function _testDownloadComplete(xhr, name, value) {
