@@ -92,10 +92,7 @@ void function() {
                 _results[_errorResult] = 1;
             }
 
-            var event = new CustomEvent('results_done', {detail: {name: _scoreResult, value: _results[_scoreResult]}});
-            window.dispatchEvent(event);
-
-            event = new CustomEvent('results_done', {detail: {name: _errorResult, value: _results[_errorResult]}});
+            var event = new CustomEvent('results_done', {detail: {results: _results}});
             window.dispatchEvent(event);
         }
 
@@ -179,7 +176,7 @@ void function() {
                     if (res["active"].__proto__ === ServiceWorker.prototype) {
                         _results[name] = value;
                     }
-                    var event = new CustomEvent('results_done', {detail: {name: name, value: value}});
+                    var event = new CustomEvent('results_done', {detail: {results: _results}});
                     window.dispatchEvent(event);
                 });
             }
@@ -234,7 +231,7 @@ void function() {
                 _results[name] = 0;
             }
 
-            var event = new CustomEvent('results_done', {detail: {name: name, value: value}});
+            var event = new CustomEvent('results_done', {detail: {results: _results}});
             window.dispatchEvent(event);
 
             return _results[name];

@@ -43,12 +43,10 @@ void function() {
         var startTime = performance.now();
 
         window.addEventListener('results_done', function (e) {
-            console.log(e.detail);
-
             // DO SOMETHING WITH THE CSS OBJECT HERE
             window.debugCSSUsage = false;
-            if(window.appendCSSUsageResults) {
-                window.appendCSSUsageResults(e.detail);
+            if(window.onCSSUsageResults) {
+                window.onCSSUsageResults();
             }  
         });
 
