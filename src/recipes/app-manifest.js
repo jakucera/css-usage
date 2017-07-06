@@ -226,7 +226,8 @@ void function() {
             if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
                 _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
                 // Save the value of the start url so we can crawl it directly later
-                _results[manifest[_manifestStrings.start_url]] = 1;
+                // Use a unique value so we can find it in the scope script
+                _results[manifest[_manifestStrings.start_url]] = 12345678;
             } else {
                 _results[name] = 0;
             }
