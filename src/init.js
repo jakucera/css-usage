@@ -16,6 +16,14 @@ void function() {
         onready();
     }
 
+    function updateResults() {
+        // Writes the results objects to the DOM as TSV
+        window.debugCSSUsage = false;
+        if(window.onCSSUsageResults) {
+            window.onCSSUsageResults();
+        }
+    }
+
     // This is the main entrypoint of our script
     function onready() {
         // Uncomment if you want to set breakpoints when running in the console
@@ -30,7 +38,7 @@ void function() {
         }
 
         // Prevent this code from running when the page has no stylesheet (probably a redirect page)
-        // if(document.styleSheets.length == 0) { return; }
+        if(document.styleSheets.length == 0) { return; }
 
         // Check to see if you're on a Firefox failure page
         if(document.styleSheets.length == 1 && browserIsFirefox) {
@@ -42,25 +50,22 @@ void function() {
         // Keep track of duration
         var startTime = performance.now();
 
+        // Allow async methods to update the results
         window.addEventListener('results_done', function (e) {
-            // DO SOMETHING WITH THE CSS OBJECT HERE
-            window.debugCSSUsage = false;
-            if(window.onCSSUsageResults) {
-                window.onCSSUsageResults();
-            }  
+            updateResults();
         });
 
-        // // register tools
-        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
-        // CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
-        // CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
-        // CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
+        // register tools
+        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.PropertyValuesAnalyzer);
+        CSSUsage.StyleWalker.ruleAnalyzers.push(CSSUsage.SelectorAnalyzer);
+        CSSUsage.StyleWalker.elementAnalyzers.push(CSSUsage.DOMClassAnalyzer);
+        CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
 
-        // // perform analysis
-        // CSSUsage.StyleWalker.walkOverDomElements();
-        // CSSUsage.StyleWalker.walkOverCssStyles();
-        // CSSUsage.PropertyValuesAnalyzer.finalize();
-        // CSSUsage.SelectorAnalyzer.finalize();
+        // perform analysis
+        CSSUsage.StyleWalker.walkOverDomElements();
+        CSSUsage.StyleWalker.walkOverCssStyles();
+        CSSUsage.PropertyValuesAnalyzer.finalize();
+        CSSUsage.SelectorAnalyzer.finalize();
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
@@ -68,5 +73,8 @@ void function() {
 
         // Update duration
         CSSUsageResults.duration = (performance.now() - startTime)|0;
+
+        // Write results objects to the DOM
+        updateResults();
     }
 }();

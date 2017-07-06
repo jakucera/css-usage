@@ -134,7 +134,7 @@ void function() { try {
 			recipesToRun: [],
 			runRecipes: false,
 
-			// 
+			//
 			walkOverCssStyles: walkOverCssStyles,
 			walkOverDomElements: walkOverDomElements,
 			
@@ -607,7 +607,7 @@ void function() { try {
 			if(buggyState !== 0 && (!buggyValues['*'] || CSSShorthands.unexpand(key).length == 0)) { return true; }
 
 			// root properties are unlikely to lie
-			if(key==rootKey) return false;			
+			if(key==rootKey) return false;
 			
 			// ask the browser is the best we can do right now
 			var values = value.split(/\s+|\s*,\s*/g);
@@ -779,7 +779,7 @@ void function() { try {
 				
 			}
 			
-			removeAnimationNames();			
+			removeAnimationNames();
 		}
 
 		//-------------------------------------------------------------------------
