@@ -211,9 +211,13 @@ void function() {
             var hasIconsProperty = _manifestStrings.icons in manifest && manifest[_manifestStrings.icons].length > 0;
             var hasValidSrc = "src" in manifest[_manifestStrings.icons][0] && manifest[_manifestStrings.icons][0]["src"].length > 0;
 
-            if (hasIconsProperty && hasValidSrc) {
-                _xhrRequest(manifest[_manifestStrings.icons][0].src, _testDownloadComplete, name, value);
-            } else {
+            try {
+                if (hasIconsProperty && hasValidSrc) {
+                    _xhrRequest(manifest[_manifestStrings.icons][0].src, _testDownloadComplete, name, value);
+                } else {
+                    _results[name] = 0;
+                }
+            } catch (ex) {
                 _results[name] = 0;
             }
 
@@ -223,12 +227,16 @@ void function() {
         function _testStartUrl(manifest, name, value) {
             var req = new XMLHttpRequest();
 
-            if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
-                _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
-                // Save the value of the start url so we can crawl it directly later
-                // Use a unique value so we can find it in the scope script
-                _results[manifest[_manifestStrings.start_url]] = 12345678;
-            } else {
+            try {
+                if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
+                    // Save the value of the start url so we can crawl it directly later
+                    // Use a unique value so we can find it in the scope script
+                    _results[manifest[_manifestStrings.start_url]] = 12345678;
+                    _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
+                } else {
+                    _results[name] = 0;
+                }
+            } catch (ex) {
                 _results[name] = 0;
             }
 
