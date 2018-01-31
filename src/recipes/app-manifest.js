@@ -30,6 +30,7 @@ void function() {
         var _self = this;
         var _scoreResult = "score";
         var _errorResult = "error";
+        var _manifestHashResult = "hash";
 
         var _manifestStrings = {
             name: "name",
@@ -86,6 +87,7 @@ void function() {
                 var manifest = JSON.parse(xhr.responseText);
                 var manifestScore = _scoreManifest(manifest);
                 _results[_scoreResult] = manifestScore;
+                _results[_manifestHashResult] = _getHashOfManifest(xhr.responseText);;
                 _results[_errorResult] = 0;
             } catch (ex) {
                 console.log("Caught exception: " + ex);
@@ -252,6 +254,16 @@ void function() {
             } else {
                 _results[name] = 0;
             }
+        }
+
+        function _getHashOfManifest(manifest) {
+            var hash = 0;
+            for (var i = 0; i < manifest.length; i++) {
+                var char = manifest.charCodeAt(i);
+                hash = ((hash<<5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash;
         }
     }
 }();
