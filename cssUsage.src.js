@@ -1568,25 +1568,29 @@ void function() {
         var _errorResult = "error";
         var _manifestHashResult = "hash";
 
+        // Standard manifest properties
         var _manifestStrings = {
+            dir: "dir", // not tested
+            lang: "lang", // not tested
             name: "name",
+            short_name: "short_name",
+            description: "description",
             icons: "icons",
-            gcm_sender_id: "gcm_sender_id",
-            orientation: "orientation",
+            screenshots: "screenshots", // not tested
+            categories: "categories",
+            iarc_rating_id: "iarc_rating_id", // not tested
+            start_url: "start_url",
             display: "display",
+            orientation: "orientation",
             theme_color: "theme_color",
             background_color: "background_color",
-            related_applications: "related_applications",
-            description: "description",
-            short_name: "short_name",
-            start_url: "start_url",
             scope: "scope",
-            dir: "dir", // not tested
+            serviceworker: "serviceworker",
+            related_applications: "related_applications",
             prefer_related_applications: "prefer_related_applications", // not tested
-            lang: "lang" // not tested
         }
 
-        // Analyze Manifest
+        // Analyze manifest
         this.analyzeManifest = function (href, results) {
             if (_isValidHrefValue(href)) {
                 results[href] = results[href] || { count: 0 };
@@ -1638,29 +1642,30 @@ void function() {
             var score = 0x0000;
 
             var properties = [
-                { name: "common_name",                         value: 0x00001, test_fn: _testCommonName},
-                { name: _manifestStrings.name,                 value: 0x00002, test_fn: _testProperty},
-                { name: _manifestStrings.icons,                value: 0x00004, test_fn: _testProperty},
-                { name: _manifestStrings.gcm_sender_id,        value: 0x00008, test_fn: _testProperty},
-                { name: _manifestStrings.orientation,          value: 0x00010, test_fn: _testProperty},
-                { name: _manifestStrings.display,              value: 0x00020, test_fn: _testProperty},
-                { name: _manifestStrings.theme_color,          value: 0x00040, test_fn: _testProperty},
-                { name: _manifestStrings.background_color,     value: 0x00080, test_fn: _testProperty},
-                { name: _manifestStrings.related_applications, value: 0x00100, test_fn: _testProperty},
-                { name: _manifestStrings.description,          value: 0x00200, test_fn: _testProperty},
-                { name: _manifestStrings.short_name,           value: 0x00400, test_fn: _testProperty},
-                { name: _manifestStrings.start_url,            value: 0x00800, test_fn: _testProperty},
-                { name: _manifestStrings.scope,                value: 0x01000, test_fn: _testProperty},
-                { name: "service_worker",                      value: 0x02000, test_fn: _testServiceWorker},
-                { name: "has_https",                           value: 0x04000, test_fn: _testHttpsSupport},
-                { name: "valid_icon",                          value: 0x08000, test_fn: _testValidIcon},
-                { name: "valid_start_url",                     value: 0x10000, test_fn: _testStartUrl}
+                { name: "common_name",                         value: 0x00001, test_fn: _testCommonName },
+                { name: _manifestStrings.name,                 value: 0x00002, test_fn: _testProperty },
+                { name: _manifestStrings.icons,                value: 0x00004, test_fn: _testProperty },
+                { name: _manifestStrings.categories,           value: 0x00008, test_fn: _testProperty },
+                { name: _manifestStrings.orientation,          value: 0x00010, test_fn: _testProperty },
+                { name: _manifestStrings.display,              value: 0x00020, test_fn: _testProperty },
+                { name: _manifestStrings.theme_color,          value: 0x00040, test_fn: _testProperty },
+                { name: _manifestStrings.background_color,     value: 0x00080, test_fn: _testProperty },
+                { name: _manifestStrings.related_applications, value: 0x00100, test_fn: _testProperty },
+                { name: _manifestStrings.description,          value: 0x00200, test_fn: _testProperty },
+                { name: _manifestStrings.short_name,           value: 0x00400, test_fn: _testProperty },
+                { name: _manifestStrings.start_url,            value: 0x00800, test_fn: _testProperty },
+                { name: _manifestStrings.scope,                value: 0x01000, test_fn: _testProperty },
+                { name: _manifestStrings.serviceworker,        value: 0x02000, test_fn: _testServiceWorker },
+                { name: "has_https",                           value: 0x04000, test_fn: _testHttpsSupport },
+                { name: "valid_icon",                          value: 0x08000, test_fn: _testValidIcon },
+                { name: "valid_start_url",                     value: 0x10000, test_fn: _testStartUrl },
+                { name: "has_manifest_extension",              value: 0x20000, test_fn: _testManifestExtensions }
             ];
 
             for (var i = 0; i < properties.length; i++) {
                 score = score | properties[i].test_fn(manifest, properties[i].name, properties[i].value);
             }
-            
+
             return score;
         }
 
@@ -1717,6 +1722,8 @@ void function() {
                     var event = new CustomEvent('results_done', {detail: {results: _results}});
                     window.dispatchEvent(event);
                 });
+            } else if (_testProperty(manifest, name, value) == value) {
+                _results[name] = value;
             }
 
             return 0x0;
@@ -1801,9 +1808,49 @@ void function() {
             }
             return hash;
         }
+
+        function _testManifestExtensions(manifest, name, value) {
+            for (var prop in manifest) {
+                if (prop.startsWith('mjs_') || prop.startsWith('gcm_')) {
+                    console.log(name + ' ' + value);
+                    _results[name] = value;
+                    _results[prop] = 1;
+                }
+            }
+
+            return _results[name];
+        }
     }
 }();
 
+/* 
+    RECIPE: Site Meta Info
+    -------------------------------------------------------------
+    Author: Joel Kucera
+    Description: This recipe looks for site meta info including language, description,
+        category and twitter card
+*/
+
+void function() {
+    window.CSSUsage.StyleWalker.recipesToRun.push( function siteMetaInfo( element, results) {
+
+        var elementName = element.nodeName.toLowerCase();
+        if (elementName === 'html') {
+            results['lang:' + element.lang] = 1;
+        } else if (elementName === 'meta') {
+            var metaName = element.name.toLowerCase();
+            console.log(metaName);
+            if (metaName === 'description' ||
+                metaName === 'category' ||
+                metaName === 'twitter:card' ||
+                metaName === 'twitter:site') {
+                results[metaName + ':' + element.content] = 1;
+            }
+        }
+
+        return results;
+    });
+}();
 //
 // This file is only here to create the TSV
 // necessary to collect the data from the crawler

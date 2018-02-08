@@ -1,8 +1,9 @@
 {
+	"lang": "en",
+	"dir": "ltr",
 	"short_name": "Manifest Test",
 	"name": "My App",
 	"short_Name": "app",
-	"gcm_sender_id": "abc",
 	"orientation": "portrait",
 	"related_applications": [
 		{
@@ -10,9 +11,16 @@
 			"id": "something"
 		}
 	],
+	"prefer_related_applications": false,
+	"serviceworker": {
+		"src": "sw.js",
+		"scope": "/",
+		"use_cache": true
+	},
 	"description": "test manifest",
 	"scope": "/",
 	"display": "standalone",
+	"iarc_rating_id": "00000000-0000-0000-0000-000000000000",
 	"icons": [
 		{
 			"src": "images/icon-144x144.png",
@@ -38,6 +46,18 @@
 			"src": "images/icon.svg",
 			"sizes": "any",
 			"type": "image/svg"
+		}
+	],
+	"screenshots": [
+		{
+			"src": "screenshots/app1.png",
+			"sizes": "640x480",
+			"type": "image/jpeg"
+		},
+		{
+			"src": "screenshots/app2.png",
+			"sizes": "1280x920",
+			"type": "image/jpeg"
 		}
 	],
 	"start_url": ".",

@@ -15,5 +15,10 @@
 	"theme_color": "#000000",
 	"start_url": "https:\/\/testmanifest2.com",
 	"display": "standalone",
-	"orientation": "portrait"
+	"orientation": "portrait",
+	"gcm_sender_id": "foo",
+	"mjs_capabilities": [
+		"webcam",
+		"location"
+	]
 }
