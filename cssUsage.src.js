@@ -1567,6 +1567,7 @@ void function() {
         var _scoreResult = "score";
         var _errorResult = "error";
         var _manifestHashResult = "hash";
+        var _version = 2;
 
         // Standard manifest properties
         var _manifestStrings = {
@@ -1597,8 +1598,18 @@ void function() {
                 results[href].count++;
 
                 _results = results[href];
+                _results["version"] = _version;
 
-                _xhrRequest(href, _manifestDownloadComplete, null, null);
+                var robotsTxt = window.location.origin + '/robots.txt';
+                _xhrRequest(robotsTxt, (xhr) => {
+                    var allowed = _analyzeRobotsTxt(xhr, href);
+
+                    if(allowed === true) {
+                        _xhrRequest(href, _manifestDownloadComplete, null, null);
+                    } else {
+                        _results["disallowed"] = 1;
+                    }
+                }, null, null)
             }
         }
 
@@ -1619,6 +1630,152 @@ void function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 cb(xhr, name, value);
             }
+        }
+
+        var RobotData = function (text) {
+            this.rules = {};
+            var _self = this;
+
+            parseText(text);
+            console.dir(_self.rules);
+
+            function parseText(text) {
+                var lines = text.split('\n');
+
+                var agents = [];
+                var inGroupSection = false;
+
+                for (var i in lines) {
+                    var line = lines[i].trim();
+
+                    // trim comments
+                    line = line.replace(/#.*/, '');
+
+                    var kv = line.split(':');
+                    if (kv.length != 2) {
+                        continue;
+                    }
+
+                    var key = kv[0].trim();
+                    var value = kv[1].trim();
+
+                    if (key.length === 0) {
+                        continue;
+                    }
+
+                    if (key.toLowerCase() === 'user-agent') {
+                        // first agent of the first or new group, reset the agents array
+                        if (inGroupSection === true) {
+                            inGroupSection = false;
+                            agents = [];
+                        }
+                        // keep adding agents until we see the first rule for the group
+                        if (value.length > 0) {
+                            agents.push(value.toLowerCase());
+                        }
+                    } else {
+                        inGroupSection = true;
+
+                        if (value.length > 0) {
+                            // trailing wildcards (*) are redundant, so remove them
+                            value = value.replace(/\*$/, '');
+
+                            // apply this rule to all the agents we found
+                            for (var i in agents) {
+                                addRule(agents[i], key.toLowerCase(), value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            function addRule(agent, ruleType, ruleValue) {
+                var agentRules = _self.rules[agent] || [];
+                agentRules.push({
+                    type: ruleType,
+                    value: ruleValue.replace(/\*/, '.*')
+                });
+
+                _self.rules[agent] = agentRules;
+            }
+
+            function applyRules(rules, path, type, value, length) {
+                var matchFound = false;
+                var matchRuleLength = -1;
+
+                for (var i in rules) {
+                    var rule = rules[i];
+                    if (rule.type === type) {
+                        var match = path.match(rule.value)
+                        if (match !== null && match.index === 0 && rule.value.length > length) {
+                            matchFound = true;
+                            matchRuleLength = rule.value.length;
+                        }
+                    }
+                }
+
+                return {
+                    match: matchFound,
+                    length: matchRuleLength,
+                    allowed: value
+                };
+            }
+
+            this.checkPath = function (path) {
+                // default to allow
+                var allowed = true;
+                // agents in order of precedence
+                var agents = ['bingbot', 'msnbot', '*'];
+                // rules in order of precedence
+                var ruleTypes = [
+                    { type: 'disallow', value: false },
+                    { type: 'allow', value: true }
+                ];
+                var appliedRules = null;
+                var matchingRuleLength = -1;
+
+                // build the url to the manifest
+                var a = document.createElement('a');
+                a.href = path;
+
+                // todo, verify that the manifest is on the same host?
+
+                // find a matching group for our bot (bing)
+                for (var i in agents) {
+                    var agent = agents[i];
+                    if (_self.rules[agent] !== null) {
+                        appliedRules = _self.rules[agent];
+                    }
+                }
+
+                // if no group applies, return the default allow value
+                if (appliedRules === null) {
+                    return allowed;
+                }
+
+                for (var i in ruleTypes) {
+                    var ruleType = ruleTypes[i];
+                    var result = applyRules(appliedRules, a.pathname, ruleType.type, ruleType.value, matchingRuleLength);
+
+                    if (result.match === true) {
+                        allowed = result.allowed;
+                        matchingRuleLength = result.length;
+                    }
+                }
+
+                return allowed;
+            }
+        };
+
+        function _analyzeRobotsTxt(xhr, href) {
+            var allowed = true;
+
+            if (xhr.status == 200) {
+                var robotData = new RobotData(xhr.responseText);
+                allowed = robotData.checkPath(href);
+            }
+
+            return allowed;
         }
 
         function _manifestDownloadComplete(xhr)
@@ -1722,6 +1879,11 @@ void function() {
                     var event = new CustomEvent('results_done', {detail: {results: _results}});
                     window.dispatchEvent(event);
                 });
+
+                navigator.serviceWorker.addEventListener('controllerchange', (evt) => {
+                    var sw = navigator.serviceWorker.controller;
+                });
+
             } else if (_testProperty(manifest, name, value) == value) {
                 _results[name] = value;
             }
@@ -1835,13 +1997,13 @@ void function() {
     window.CSSUsage.StyleWalker.recipesToRun.push( function siteMetaInfo( element, results) {
 
         var elementName = element.nodeName.toLowerCase();
-        if (elementName === 'html') {
+        if (elementName === 'html' || elementName === 'title') {
             results['lang:' + element.lang] = 1;
         } else if (elementName === 'meta') {
             var metaName = element.name.toLowerCase();
-            console.log(metaName);
             if (metaName === 'description' ||
                 metaName === 'category' ||
+                metaName === 'content-language' ||
                 metaName === 'twitter:card' ||
                 metaName === 'twitter:site') {
                 results[metaName + ':' + element.content] = 1;

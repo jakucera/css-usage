@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /stuff
+
+User-agent: BingBot
+Disallow: /app

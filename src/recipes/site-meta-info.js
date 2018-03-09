@@ -10,12 +10,13 @@ void function() {
     window.CSSUsage.StyleWalker.recipesToRun.push( function siteMetaInfo( element, results) {
 
         var elementName = element.nodeName.toLowerCase();
-        if (elementName === 'html') {
+        if (elementName === 'html' || elementName === 'title') {
             results['lang:' + element.lang] = 1;
         } else if (elementName === 'meta') {
             var metaName = element.name.toLowerCase();
             if (metaName === 'description' ||
                 metaName === 'category' ||
+                metaName === 'content-language' ||
                 metaName === 'twitter:card' ||
                 metaName === 'twitter:site') {
                 results[metaName + ':' + element.content] = 1;

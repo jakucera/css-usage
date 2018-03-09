@@ -1,0 +1,15 @@
+Sitemap: https://arstechnica.com/sitemap.xml
+
+User-agent: *
+Disallow:
+
+#User-agent: BingBot
+User-agent: googlebot
+#Disallow: /recipes
+#Disallow: /tests/
+#Allow: /tests/recipes/
+Disallow: */private/
+allow: *.json
+
+User-agent: msnbot
+disallow: /
