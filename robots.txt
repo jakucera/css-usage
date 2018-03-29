@@ -1,9 +1,9 @@
-Sitemap: https://arstechnica.com/sitemap.xml
+Sitemap: https://localhost:8080/sitemap.xml
 
 User-agent: *
 Disallow:
 
-#User-agent: BingBot
+User-agent: BingBot
 User-agent: googlebot
 #Disallow: /recipes
 #Disallow: /tests/

@@ -207,8 +207,9 @@ void function() {
                 // find a matching group for our bot (bing)
                 for (var i in agents) {
                     var agent = agents[i];
-                    if (_self.rules[agent] !== null) {
+                    if (_self.rules[agent] !== undefined) {
                         appliedRules = _self.rules[agent];
+                        break;
                     }
                 }
 
@@ -314,7 +315,8 @@ void function() {
                 'favicon',
                 'asp.net mvc boilerplate (required! update this)',
                 'push demo',
-                'new project'
+                'new project',
+                'React PWA'
             ];
 
             for (var i = 0; i < commonNames.length; i++) {
