@@ -157,7 +157,7 @@ void function() {
                 var agentRules = _self.rules[agent] || [];
                 agentRules.push({
                     type: ruleType,
-                    value: ruleValue.replace(/\*/, '.*')
+                    value: ruleValue.replace(/\*/, '.*').replace(/\?/, '\\?')
                 });
 
                 _self.rules[agent] = agentRules;

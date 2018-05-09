@@ -9,7 +9,8 @@ User-agent: googlebot
 #Disallow: /tests/
 #Allow: /tests/recipes/
 Disallow: */private/
-allow: *.json
+#allow: *.json
+Disallow: /*?
 
 User-agent: msnbot
 disallow: /

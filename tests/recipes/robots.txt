@@ -3,4 +3,6 @@ Allow: /
 Disallow: /stuff
 
 User-agent: BingBot
+Allow: /*?lang=
 Disallow: /app
+Disallow: /*?
