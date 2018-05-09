@@ -64,7 +64,10 @@ void function() {
                 _results = results[href];
                 _results["version"] = _version;
 
-                var robotsTxt = window.location.origin + '/robots.txt';
+                // need to use origin of the manifest href, not the window location
+                var hostRegex = /(http[s]?:\/\/.*?)\//;
+                var hostMatch = hostRegex.exec(href);
+                var robotsTxt = hostMatch[1] + '/robots.txt';
                 _xhrRequest(robotsTxt, (xhr) => {
                     var allowed = _analyzeRobotsTxt(xhr, href);
 
@@ -86,7 +89,7 @@ void function() {
             req.onreadystatechange = (evt) => { _handleXhrReadyStateChange(evt.target, cb, name, value); };
             req.addEventListener("error", (evt) => { cb(evt.target, name, 0x0); });
             req.addEventListener("abort", (evt) => { cb(evt.target, name, 0x0); });
-            req.open("GET", href, false);
+            req.open("GET", href, true);
             req.send();
         }
 
@@ -379,8 +382,6 @@ void function() {
         }
 
         function _testValidIcon(manifest, name, value) {
-            var req = new XMLHttpRequest();
-
             var hasIconsProperty = _manifestStrings.icons in manifest && manifest[_manifestStrings.icons].length > 0;
             var hasValidSrc = "src" in manifest[_manifestStrings.icons][0] && manifest[_manifestStrings.icons][0]["src"].length > 0;
 
@@ -398,8 +399,6 @@ void function() {
         }
 
         function _testStartUrl(manifest, name, value) {
-            var req = new XMLHttpRequest();
-
             try {
                 if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
                     // Save the value of the start url so we can crawl it directly later
