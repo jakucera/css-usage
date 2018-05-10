@@ -1605,7 +1605,7 @@ void function() {
                 var hostMatch = hostRegex.exec(href);
                 var robotsTxt = hostMatch[1] + '/robots.txt';
                 _xhrRequest(robotsTxt, (xhr) => {
-                    var allowed = _analyzeRobotsTxt(xhr, href);
+                    var allowed = xhr === null || _analyzeRobotsTxt(xhr, href);
 
                     if(allowed === true) {
                         _xhrRequest(href, _manifestDownloadComplete, null, null);
@@ -1621,12 +1621,17 @@ void function() {
         }
 
         function _xhrRequest(href, cb, name, value) {
-            var req = new XMLHttpRequest();
-            req.onreadystatechange = (evt) => { _handleXhrReadyStateChange(evt.target, cb, name, value); };
-            req.addEventListener("error", (evt) => { cb(evt.target, name, 0x0); });
-            req.addEventListener("abort", (evt) => { cb(evt.target, name, 0x0); });
-            req.open("GET", href, true);
-            req.send();
+            try {
+                var req = new XMLHttpRequest();
+                req.onreadystatechange = (evt) => { _handleXhrReadyStateChange(evt.target, cb, name, value); };
+                req.addEventListener("error", (evt) => { cb(evt.target, name, 0x0); });
+                req.addEventListener("abort", (evt) => { cb(evt.target, name, 0x0); });
+                req.open("GET", href, false);
+                req.send();
+            } catch (e) {
+                _results["xhrexception"] = 1;
+                cb(null, name, value);
+            }
         }
 
         function _handleXhrReadyStateChange(xhr, cb, name, value) {
