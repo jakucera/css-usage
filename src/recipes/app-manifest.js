@@ -81,7 +81,8 @@ void function() {
         }
 
         function _isValidHrefValue(href) {
-            return href.match(/http[s]?:\/\/.+/gi);
+            var regex = RegExp(/http[s]?:\/\/.+/gi);
+            return regex.test(href);
         }
 
         function _xhrRequest(href, cb, name, value) {
@@ -109,7 +110,6 @@ void function() {
             var _self = this;
 
             parseText(text);
-            console.dir(_self.rules);
 
             function parseText(text) {
                 var lines = text.split('\n');
@@ -117,7 +117,7 @@ void function() {
                 var agents = [];
                 var inGroupSection = false;
 
-                for (var i in lines) {
+                for (var i = 0; i < lines.length; i++) {
                     var line = lines[i].trim();
 
                     // trim comments
@@ -153,8 +153,8 @@ void function() {
                             value = value.replace(/\*$/, '');
 
                             // apply this rule to all the agents we found
-                            for (var i in agents) {
-                                addRule(agents[i], key.toLowerCase(), value);
+                            for (var j = 0; j < agents.length; j++) {
+                                addRule(agents[j], key.toLowerCase(), value);
                             }
                         }
                     }
@@ -213,7 +213,7 @@ void function() {
                 // todo, verify that the manifest is on the same host?
 
                 // find a matching group for our bot (bing)
-                for (var i in agents) {
+                for (var i = 0; i < agents.length; i++) {
                     var agent = agents[i];
                     if (_self.rules[agent] !== undefined) {
                         appliedRules = _self.rules[agent];
@@ -226,7 +226,7 @@ void function() {
                     return allowed;
                 }
 
-                for (var i in ruleTypes) {
+                for (var i = 0; i < ruleTypes.length; i++) {
                     var ruleType = ruleTypes[i];
                     var result = applyRules(appliedRules, a.pathname, ruleType.type, ruleType.value, matchingRuleLength);
 
@@ -242,7 +242,6 @@ void function() {
 
         function _analyzeRobotsTxt(xhr, href) {
             var allowed = true;
-
             if (xhr.status == 200) {
                 var robotData = new RobotData(xhr.responseText);
                 allowed = robotData.checkPath(href);
@@ -388,16 +387,23 @@ void function() {
 
         function _testValidIcon(manifest, name, value) {
             var hasIconsProperty = _manifestStrings.icons in manifest && manifest[_manifestStrings.icons].length > 0;
-            var hasValidSrc = "src" in manifest[_manifestStrings.icons][0] && manifest[_manifestStrings.icons][0]["src"].length > 0;
 
-            try {
-                if (hasIconsProperty && hasValidSrc) {
-                    _xhrRequest(manifest[_manifestStrings.icons][0].src, _testDownloadComplete, name, value);
-                } else {
+            if (hasIconsProperty) {
+                var hasValidSrc = "src" in manifest[_manifestStrings.icons][0] && manifest[_manifestStrings.icons][0]["src"].length > 0;
+
+                try {
+                    if (hasValidSrc) {
+                        var img = document.createElement('img');
+                        img.onload = (evt) => {_results[name] = value; };
+                        img.onerror = (evt) => { _results[name] = 0; };
+
+                        img.src = manifest[_manifestStrings.icons][0].src;
+                    } else {
+                        _results[name] = 0;
+                    }
+                } catch (ex) {
                     _results[name] = 0;
                 }
-            } catch (ex) {
-                _results[name] = 0;
             }
 
             return _results[name];

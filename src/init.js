@@ -62,10 +62,12 @@ void function() {
         CSSUsage.StyleWalker.elementAnalyzers.push(HtmlUsage.GetNodeName);
 
         // perform analysis
+        /*
         CSSUsage.StyleWalker.walkOverDomElements();
         CSSUsage.StyleWalker.walkOverCssStyles();
         CSSUsage.PropertyValuesAnalyzer.finalize();
         CSSUsage.SelectorAnalyzer.finalize();
+        */
 
         // Walk over the dom elements again for Recipes
         CSSUsage.StyleWalker.runRecipes = true;
