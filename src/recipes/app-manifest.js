@@ -64,6 +64,9 @@ void function() {
                 _results = results[href];
                 _results["version"] = _version;
 
+                // fire right away to get some results in case the manifest xhr times out
+                var event = new CustomEvent('update_results', {detail: {results: _results}});
+
                 // need to use origin of the manifest href, not the window location
                 var hostRegex = /(http[s]?:\/\/.*?)\//;
                 var hostMatch = hostRegex.exec(href);
@@ -263,7 +266,7 @@ void function() {
                 _results[_errorResult] = 1;
             }
 
-            var event = new CustomEvent('results_done', {detail: {results: _results}});
+            var event = new CustomEvent('update_results', {detail: {results: _results}});
             window.dispatchEvent(event);
         }
 
@@ -349,7 +352,7 @@ void function() {
                     if (res["active"].__proto__ === ServiceWorker.prototype) {
                         _results[name] = value;
                     }
-                    var event = new CustomEvent('results_done', {detail: {results: _results}});
+                    var event = new CustomEvent('update_results', {detail: {results: _results}});
                     window.dispatchEvent(event);
                 });
 
@@ -423,7 +426,7 @@ void function() {
                 _results[name] = 0;
             }
 
-            var event = new CustomEvent('results_done', {detail: {results: _results}});
+            var event = new CustomEvent('update_results', {detail: {results: _results}});
             window.dispatchEvent(event);
 
             return _results[name];

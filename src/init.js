@@ -38,7 +38,7 @@ void function() {
         }
 
         // Prevent this code from running when the page has no stylesheet (probably a redirect page)
-        if(document.styleSheets.length == 0) { return; }
+        // if(document.styleSheets.length == 0) { return; }
 
         // Check to see if you're on a Firefox failure page
         if(document.styleSheets.length == 1 && browserIsFirefox) {
@@ -51,7 +51,7 @@ void function() {
         var startTime = performance.now();
 
         // Allow async methods to update the results
-        window.addEventListener('results_done', function (e) {
+        window.addEventListener('update_results', function (e) {
             updateResults();
         });
 
