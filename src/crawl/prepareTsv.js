@@ -66,6 +66,7 @@ window.onCSSUsageResults = function onCSSUsageResults() {
 
 	// Convert into one single tsv file
 	var tsvString = INSTRUMENTATION_RESULTS_TSV.map((row) => (row.join('\t'))).join('\n');
+	tsvString += '\n';
 
 	appendTSVToDom(tsvString);
 
@@ -110,6 +111,10 @@ window.onCSSUsageResults = function onCSSUsageResults() {
 
 		currentRowTemplate.push('ua');
 		convertToTSV({identifier: INSTRUMENTATION_RESULTS.UASTRING});
+		currentRowTemplate.pop();
+
+		currentRowTemplate.push('origurl');
+		convertToTSV({url: window.origCrawlUrl || ''});
 		currentRowTemplate.pop();
 
 		currentRowTemplate.push('css');

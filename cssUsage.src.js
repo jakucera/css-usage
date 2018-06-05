@@ -766,13 +766,13 @@ void function() { try {
 		 */
 		function walkOverDomElements(obj, index) {
 			if(window.debugCSSUsage) console.log("STAGE: Walking over DOM elements");
-			var recipesToRun = CSSUsage.StyleWalker.recipesToRun;			
+			var recipesToRun = CSSUsage.StyleWalker.recipesToRun;
 			obj = obj || document.documentElement; index = index|0;
 
 			// Loop through the elements
 			var elements = [].slice.call(document.all,0);
 			for(var i = 0; i < elements.length; i++) { 
-				var element=elements[i];			
+				var element=elements[i];
 				
 				// Analyze its style, if any
 				if(!CSSUsage.StyleWalker.runRecipes) {
@@ -785,7 +785,7 @@ void function() { try {
 						var isInline = true;
 						var selectorText = '@inline:'+element.tagName;
 						var matchedElements = [element];
-						runRuleAnalyzers(element.style, selectorText, matchedElements, ruleType, isInline);					
+						runRuleAnalyzers(element.style, selectorText, matchedElements, ruleType, isInline);
 					}
 				} else { // We've already walked the DOM crawler and need to run the recipes
 					for(var r = 0; r < recipesToRun.length ; r++) {
@@ -1564,6 +1564,7 @@ void function() {
     function AppManifestAnalyzer() {
         var _results = {};
         var _self = this;
+        var _href = '';
         var _scoreResult = "score";
         var _errorResult = "error";
         var _manifestHashResult = "hash";
@@ -1596,6 +1597,7 @@ void function() {
             if (_isValidHrefValue(href)) {
                 results[href] = results[href] || { count: 0 };
                 results[href].count++;
+                _href = href;
 
                 _results = results[href];
                 _results["version"] = _version;
@@ -1936,6 +1938,7 @@ void function() {
                         img.onload = (evt) => {_results[name] = value; };
                         img.onerror = (evt) => { _results[name] = 0; };
 
+                        // todo: the source should be relative to the manifest url
                         img.src = manifest[_manifestStrings.icons][0].src;
                     } else {
                         _results[name] = 0;
@@ -1955,6 +1958,8 @@ void function() {
                     // Use a unique value so we can find it in the scope script
                     _results[manifest[_manifestStrings.start_url]] = 12345678;
                     _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
+
+                    // todo: consider saving a computed start_url based on the rules on w3c
                 } else {
                     _results[name] = 0;
                 }
@@ -2096,6 +2101,7 @@ window.onCSSUsageResults = function onCSSUsageResults() {
 
 	// Convert into one single tsv file
 	var tsvString = INSTRUMENTATION_RESULTS_TSV.map((row) => (row.join('\t'))).join('\n');
+	tsvString += '\n';
 
 	appendTSVToDom(tsvString);
 
@@ -2140,6 +2146,10 @@ window.onCSSUsageResults = function onCSSUsageResults() {
 
 		currentRowTemplate.push('ua');
 		convertToTSV({identifier: INSTRUMENTATION_RESULTS.UASTRING});
+		currentRowTemplate.pop();
+
+		currentRowTemplate.push('origurl');
+		convertToTSV({url: window.origCrawlUrl || ''});
 		currentRowTemplate.pop();
 
 		currentRowTemplate.push('css');

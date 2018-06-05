@@ -269,13 +269,13 @@ void function() { try {
 		 */
 		function walkOverDomElements(obj, index) {
 			if(window.debugCSSUsage) console.log("STAGE: Walking over DOM elements");
-			var recipesToRun = CSSUsage.StyleWalker.recipesToRun;			
+			var recipesToRun = CSSUsage.StyleWalker.recipesToRun;
 			obj = obj || document.documentElement; index = index|0;
 
 			// Loop through the elements
 			var elements = [].slice.call(document.all,0);
 			for(var i = 0; i < elements.length; i++) { 
-				var element=elements[i];			
+				var element=elements[i];
 				
 				// Analyze its style, if any
 				if(!CSSUsage.StyleWalker.runRecipes) {
@@ -288,7 +288,7 @@ void function() { try {
 						var isInline = true;
 						var selectorText = '@inline:'+element.tagName;
 						var matchedElements = [element];
-						runRuleAnalyzers(element.style, selectorText, matchedElements, ruleType, isInline);					
+						runRuleAnalyzers(element.style, selectorText, matchedElements, ruleType, isInline);
 					}
 				} else { // We've already walked the DOM crawler and need to run the recipes
 					for(var r = 0; r < recipesToRun.length ; r++) {

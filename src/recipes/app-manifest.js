@@ -28,6 +28,7 @@ void function() {
     function AppManifestAnalyzer() {
         var _results = {};
         var _self = this;
+        var _href = '';
         var _scoreResult = "score";
         var _errorResult = "error";
         var _manifestHashResult = "hash";
@@ -60,6 +61,7 @@ void function() {
             if (_isValidHrefValue(href)) {
                 results[href] = results[href] || { count: 0 };
                 results[href].count++;
+                _href = href;
 
                 _results = results[href];
                 _results["version"] = _version;
@@ -400,6 +402,7 @@ void function() {
                         img.onload = (evt) => {_results[name] = value; };
                         img.onerror = (evt) => { _results[name] = 0; };
 
+                        // todo: the source should be relative to the manifest url
                         img.src = manifest[_manifestStrings.icons][0].src;
                     } else {
                         _results[name] = 0;
@@ -419,6 +422,8 @@ void function() {
                     // Use a unique value so we can find it in the scope script
                     _results[manifest[_manifestStrings.start_url]] = 12345678;
                     _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
+
+                    // todo: consider saving a computed start_url based on the rules on w3c
                 } else {
                     _results[name] = 0;
                 }
