@@ -66,7 +66,6 @@ window.onCSSUsageResults = function onCSSUsageResults() {
 
 	// Convert into one single tsv file
 	var tsvString = INSTRUMENTATION_RESULTS_TSV.map((row) => (row.join('\t'))).join('\n');
-	tsvString += '\n';
 
 	appendTSVToDom(tsvString);
 
