@@ -1569,6 +1569,8 @@ void function() {
         var _errorResult = "error";
         var _manifestHashResult = "hash";
         var _version = 2;
+        var _manifestStartUrlValue = 12345678;
+        var _iconHrefValue = 123456789;
 
         // Standard manifest properties
         var _manifestStrings = {
@@ -1940,6 +1942,9 @@ void function() {
 
                         // todo: the source should be relative to the manifest url
                         img.src = manifest[_manifestStrings.icons][0].src;
+
+                        // save the img href for the first icon
+                        _results[manifest[_manifestStrings.icons][0].src] = _iconHrefValue;
                     } else {
                         _results[name] = 0;
                     }
@@ -1956,7 +1961,7 @@ void function() {
                 if (_manifestStrings.start_url in manifest && manifest[_manifestStrings.start_url].length > 0) {
                     // Save the value of the start url so we can crawl it directly later
                     // Use a unique value so we can find it in the scope script
-                    _results[manifest[_manifestStrings.start_url]] = 12345678;
+                    _results[manifest[_manifestStrings.start_url]] = _manifestStartUrlValue;
                     _xhrRequest(manifest[_manifestStrings.start_url], _testDownloadComplete, name, value);
 
                     // todo: consider saving a computed start_url based on the rules on w3c
