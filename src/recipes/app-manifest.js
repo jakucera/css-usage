@@ -33,6 +33,7 @@ void function() {
         var _errorResult = "error";
         var _manifestHashResult = "hash";
         var _version = 2;
+        var _appNameValue = 1234567;
         var _manifestStartUrlValue = 12345678;
         var _iconHrefValue = 123456789;
 
@@ -308,17 +309,23 @@ void function() {
         function _testCommonName(manifest, propertyName, value) {
             var name = "";
             if (_manifestStrings.name in manifest) {
-                name = manifest[_manifestStrings.name].toLowerCase();
+                name = manifest[_manifestStrings.name];
             }
 
             var shortName = "";
             if (_manifestStrings.short_name in manifest) {
-                shortName = manifest[_manifestStrings.short_name].toLowerCase();
+                shortName = manifest[_manifestStrings.short_name];
             }
 
             if (name === "" && shortName === "") {
                 return 0x0;
             }
+
+            var appName = shortName || name;
+            _results[appName] = _appNameValue;
+
+            name = name.toLowerCase();
+            shortName = shortName.toLowerCase();
 
             // top generic/common names in name and short_name fields in previously crawled manifests
             var commonNames = [
@@ -330,7 +337,9 @@ void function() {
                 'asp.net mvc boilerplate (required! update this)',
                 'push demo',
                 'new project',
-                'React PWA'
+                'react pwa',
+                'react app',
+                'onesignal example'
             ];
 
             for (var i = 0; i < commonNames.length; i++) {
